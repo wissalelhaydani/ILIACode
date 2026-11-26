@@ -12,15 +12,15 @@ LEXIQUE = set(
     .read_text(encoding="utf-8").split()
 )
 
+# Chemin vers le fichier reglages.json
+CHEMIN_REGLAGES = (
+    Path(__file__).resolve().parents[2]
+    / "seance7"
+    / "reglages.json"
+)
 
-def lire_reglages(chemin=None):
-    if chemin is None:
-        chemin = (
-            Path(__file__).resolve().parents[2]
-            / "seance7"
-            / "reglages.json"
-        )
 
+def lire_reglages(chemin=CHEMIN_REGLAGES):
     with open(chemin, encoding="utf-8") as fichier:
         return json.load(fichier)
 
