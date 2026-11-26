@@ -36,5 +36,5 @@ def demander(texte, type_demande, modele="moteur", n_max=400):
     headers={"Content-Type": "application/json",
     "Authorization": "Bearer " + os.environ["CLE_ILIACODE"]})
     with urllib.request.urlopen(requete, timeout=300) as reponse:
-    choix = json.loads(reponse.read())["choices"][0]
+        choix = json.loads(reponse.read())["choices"][0]
     return choix["message"]["content"], choix["finish_reason"] == "stop"

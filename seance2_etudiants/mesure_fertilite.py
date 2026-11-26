@@ -12,7 +12,7 @@ from bpe import pretokeniser, fertilite, encoder
 from outils import entrainer_rapide
 
 TAILLES = [500, 1000, 2000, 4000, 8000]       # tailles cibles de V
-BASE_ET_MARQUEUR = 257                          # 256 octets + le marqueur de fin de mot
+BASE_ET_MARQUEUR = 257                          # 256 octets + le marqueur de fin de mot / si on leur ajoute les fuison on obtient le vocabulaire
 
 
 def lire_dossier(dossier):
@@ -51,7 +51,7 @@ print("|V|      " + "".join(f"{nom:>10}" for nom in test))
 print("octets   " + "".join(f"{fertilite(t, []):10.2f}" for t in test.values()))
 for taille in TAILLES:
     f = fusions[:taille - BASE_ET_MARQUEUR]     # les premières fusions suffisent, l'ordre est le même
-    print(f"{taille:<9}" + "".join(f"{fertilite(t, f):10.2f}" for t in test.values()))
+    print(f"{taille:<9}" + "".join(f"{fertilite(t, f):10.2f}" for t in test.values()))  # fusion ghir par test 
 
 # --- Sauvegarde du tokeniseur retenu ---------------------------------------
 RETENU = 2000

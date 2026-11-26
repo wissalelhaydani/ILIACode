@@ -17,7 +17,7 @@ def test_lire_ancien_encodage(tmp_path):
 
 
 # ---------- Bloc Réparer (2 tests) ----------
-def test_reparer_mojibake():
+def test_reparer_mojibake():0
     assert reparer("# crÃ©Ã© par K. Alaoui") == "# créé par K. Alaoui"
 
 

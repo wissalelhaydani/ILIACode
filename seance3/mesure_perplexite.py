@@ -50,7 +50,7 @@ def en_tokens(ligne):
         if mot.isspace():
             continue
         if mot not in memoire:
-            memoire[mot] = encoder_mot(mot, rangs)
+            memoire[mot] = encoder_mot(mot, rangs) # tuple cs mhtaja les rangs
         tokens.extend(memoire[mot])
     return tokens
 
@@ -60,13 +60,13 @@ def lire_lignes(chemins):
     sequences = []
     for chemin in sorted(chemins):
         for ligne in open(chemin, encoding="utf-8").read().splitlines():
-            if ligne.strip():
+            if ligne.strip():  # hadi mafhmthax 
                 sequences.append(en_tokens(ligne))
     return [s for s in sequences if s]
 
 
 def fichiers(dossier):
-    return glob.glob(str(SEANCE2 / "donnees" / dossier / "**" / "*.*"), recursive=True)
+    return glob.glob(str(SEANCE2 / "donnees" / dossier / "**" / "*.*"), recursive=True) # glob definit les condition d acces
 
 
 # --- Les trois blocs du protocole ---------------------------------------------
@@ -78,10 +78,10 @@ test = {
     "français": lire_lignes([SEANCE2 / "donnees/test/tickets_fr.txt"]),
     "anglais": lire_lignes([SEANCE2 / "donnees/test/tickets_en.txt"]),
     "darija": lire_lignes([SEANCE2 / "donnees/test/tickets_darija.txt"]),
-}
+} # sortie une liste de liste tokenise 
 
 # --- Phase 1, compter sur le bloc train ----------------------------------------
-paires, contextes = compter(train)
+paires, contextes = compter(train)  
 nb_tokens = sum(contextes.values())
 print(f"train : {len(train)} lignes, {nb_tokens} tokens prédits, |V| = {TAILLE_V}")
 print(f"bigrammes distincts vus : {len(paires)} sur {TAILLE_V ** 2} possibles, "
@@ -107,7 +107,7 @@ print(f"\nk retenu sur le dev : {meilleur_k}")
 # --- Le chiffre final, une seule lecture du bloc test ---------------------------
 print()
 print("perplexité sur le test, k =", meilleur_k)
-for nom, sequences in test.items():
+for nom, sequences in test.items():  
     pp = perplexite(probas_du_texte(sequences, paires, contextes, TAILLE_V, meilleur_k))
     print(f"  {nom:<10}{pp:10.1f}")
 print(f"  {'hasard':<10}{TAILLE_V:10.1f}   (un modèle qui tirerait au sort parmi |V| tokens)")
