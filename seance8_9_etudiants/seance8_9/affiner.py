@@ -31,12 +31,39 @@ print("paramètres entraînés", sum(p.numel() for p in entraines))
 
 
 def exemple(paire):
+
     demande = tokeniseur.apply_chat_template(
-        [{"role": "user", "content": paire["demande"]}], tokenize=False, add_generation_prompt=True)
-    ids_demande = tokeniseur(demande)["input_ids"]
-    ids = tokeniseur(demande + paire["reponse"] + "<|im_end|>")["input_ids"]
-    cibles = [-100] * len(ids_demande) + ids[len(ids_demande):]
-    return torch.tensor([ids]).cuda(), torch.tensor([cibles]).cuda() 
+        [
+            {
+                "role": "user",
+                "content": paire["demande"]
+            }
+        ],
+        tokenize=False,
+        add_generation_prompt=True
+    )
+
+    ids_demande = tokeniseur(
+        demande,
+        add_special_tokens=False
+    )["input_ids"]
+
+    ids_reponse = tokeniseur(
+        paire["reponse"] + "<|im_end|>",
+        add_special_tokens=False
+    )["input_ids"]
+
+    ids = ids_demande + ids_reponse
+
+    cibles = (
+        [-100] * len(ids_demande)
+        + ids_reponse
+    )
+
+    return (
+        torch.tensor([ids]).cuda(),
+        torch.tensor([cibles]).cuda()
+    )
 
 #on laisse la demander tokeniser pour savoir quoi fire flmasque
 
