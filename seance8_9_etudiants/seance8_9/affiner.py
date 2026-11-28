@@ -14,10 +14,16 @@ moteur.gradient_checkpointing_enable() #mnhsboux les gradients de k v q
 moteur.enable_input_require_grads()
 
 moteur = get_peft_model(moteur, LoraConfig(
-    r=32, lora_alpha=64, lora_dropout=0.05,
-    target_modules=["q_proj","k_proj","v_proj","o_proj","gate_proj","up_proj","down_proj"],
-    use_rslora=True,  # stabilise les rangs plus élevés
-    task_type="CAUSAL_LM"))
+    r=32,
+    lora_alpha=64,
+    lora_dropout=0.05,
+    target_modules=[
+        "q_proj", "k_proj", "v_proj", "o_proj",
+        "gate_proj", "up_proj", "down_proj"
+    ],
+    use_rslora=True,
+    task_type="CAUSAL_LM"
+))
 entraines = [p for p in moteur.parameters() if p.requires_grad] # p sont des tenseur ( a et b)
 for p in entraines:
     p.data = p.data.float() #p.data acceder au valeur numerique lhsab ce fait par cpu dakxi bax .float likatparsi l 32
@@ -34,21 +40,54 @@ def exemple(paire):
 
 #on laisse la demander tokeniser pour savoir quoi fire flmasque
 
-#phase d'entrainement
+# Phase d'entraînement
 paires = json.load(open("paires.json", encoding="utf-8"))
-adam = torch.optim.AdamW(entraines, lr=2e-4)
+
+adam = torch.optim.AdamW(
+    entraines,
+    lr=1e-4,
+    weight_decay=0.01
+)
+
 random.seed(0)
-for epoque in range(2):
+torch.manual_seed(0)
+
+moteur.train()
+moteur.config.use_cache = False
+
+for epoque in range(4):
+
     random.shuffle(paires)
-    pertes = []  #losses du kola batch fnormal ms hna losses pour chaque pair entrainement stochastique
+    pertes = []
+
     for paire in paires:
-        ids, cibles = exemple(paire) # la cible masqué wl gabarit hada 3lax khdmna b fct exemple(paire)
-        perte = moteur(input_ids=ids, labels=cibles).loss #label kt3tik lposition du true token
-        perte.backward() #hna kihsb lgrad
-        adam.step() #hna kidir action de maj
+
         adam.zero_grad()
+
+        ids, cibles = exemple(paire)
+
+        perte = moteur(
+            input_ids=ids,
+            labels=cibles
+        ).loss
+
+        perte.backward()
+
+        # Éviter les gradients trop importants
+        torch.nn.utils.clip_grad_norm_(
+            entraines,
+            max_norm=1.0
+        )
+
+        adam.step()
+
         pertes.append(perte.item())
-    print(f"époque {epoque + 1}, perte moyenne {sum(pertes) / len(pertes):.3f}")
+
+    print(
+        f"Époque {epoque + 1}, "
+        f"perte moyenne : "
+        f"{sum(pertes) / len(pertes):.3f}"
+    )
 
 for p in entraines:
     p.data = p.data.to(torch.float16) #stockage en 16 save les param lidartlihom pretaine
