@@ -57,8 +57,9 @@ def surprises(modele, texte):
 
 if __name__ == "__main__":
     modele = sys.argv[1]
-    jeu = json.load(open("jeu_test.json", encoding="utf-8"))
-    with ThreadPoolExecutor(len(jeu)) as lot:
+    chemin = sys.argv[2] if len(sys.argv) > 2 else "jeu_test.json"
+    jeu = json.load(open(chemin, encoding="utf-8"))
+    with ThreadPoolExecutor(min(len(jeu), 16)) as lot:
         sorties = list(lot.map(lambda d: demander(d["demande"], d["type"], modele), jeu))
 
     for d, (texte, arrete) in zip(jeu, sorties):
@@ -68,6 +69,19 @@ if __name__ == "__main__":
     juges = [(d, t) for d, (t, _) in zip(jeu, sorties) if d["type"] != "explication"]
     justes = sum(juste(d, t) for d, t in juges)
     maisons = sum(arrete and maison(d, t) for d, (t, arrete) in zip(jeu, sorties))
+
+    print("=== ÉCHECS ===")
+    for d, (t, arrete) in zip(jeu, sorties):
+        raisons = []
+        if not arrete:
+            raisons.append("sans arrêt")
+        if not (arrete and maison(d, t)):
+            raisons.append("format")
+        if d["type"] != "explication" and not juste(d, t):
+            raisons.append("faux")
+        if raisons:
+            print(f"[{d['type']}] {d['demande'][:60]!r} -> {', '.join(raisons)}")
+
     bits = [b for f in sorted(Path("mis_de_cote").glob("*.py")) for b in surprises(modele, f.read_text(encoding="utf-8"))]
     L = sum(bits) / len(bits)
 
